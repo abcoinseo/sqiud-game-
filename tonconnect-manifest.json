@@ -1,15 +1,5 @@
 {
-  "name": "Ab Studio",
-  "url": "https://t.me/Squibgamebot",
-  "icon": "https://cache.tonapi.io/imgproxy/iNMnoEReCDR47JfMedDWbTI9SN0M-9qd_tigLlDiMS0/rs:fill:200:200:1/g:no/aHR0cHM6Ly9pbWcuY29sbGVjdGlmeS5hcHAvamV0dG9uX3NwbC90b3oyeDlkbmZIYUc3c3pFamh5WlJzcWZVSkREUlVwZlhoVllxNEdRLnBuZw.webp",
-  "manifest_version": 1,
-  "description": "Ab Studio provides seamless wallet integration for your apps and extensions.",
-  "platform": {
-    "wallet": "web3",
-    "extensions_supported": true,
-    "apps_supported": true,
-    "app_react": {
-      "pc": true
-    }
-  }
+    "url": "https://t.me/Squibgamebot",
+    "name": "AB Studio",
+    "iconUrl": "https://cache.tonapi.io/imgproxy/iNMnoEReCDR47JfMedDWbTI9SN0M-9qd_tigLlDiMS0/rs:fill:200:200:1/g:no/aHR0cHM6Ly9pbWcuY29sbGVjdGlmeS5hcHAvamV0dG9uX3NwbC90b3oyeDlkbmZIYUc3c3pFamh5WlJzcWZVSkREUlVwZlhoVllxNEdRLnBuZw.webp"
 }
