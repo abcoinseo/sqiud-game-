@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task to Earn</title>
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f70aa8a8; /* Light purple background */
+            color: rgb(248, 10, 197);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Wallet Section */
+        .wallet {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+        .wallet .material-icons {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+        #coin-balance {
+            font-size: 20px;
+        }
+
+        /* Task Section */
+        .task-section {
+            width: 90%;
+            max-width: 1200px;
+            margin-top: 20px;
+            overflow-y: auto; /* Allow scrolling */
+            max-height: 500px; /* Set a max height for scrolling */
+            padding: 10px;
+        }
+        .task-title {
+            font-size: 22px;
+            margin: 20px 0 10px 0;
+            text-align: left;
+            font-weight: bold;
+        }
+        .task-item {
+            background-color: #111111;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .task-item img {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+            border-radius: 5px;
+        }
+        .task-item button {
+            padding: 8px 15px;
+            background-color: rgb(6, 68, 240);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .task-item button:hover {
+            background-color: rgb(5, 57, 200);
+        }
+        .task-item button.completed {
+            background-color: rgb(42, 250, 0);
+        }
+        .task-item button:disabled {
+            background-color: rgb(29, 252, 0);
+            cursor: not-allowed;
+        }
+
+        /* Modal Popup */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #1c1c1c;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            width: 80%;
+        }
+        .modal-content input {
+            width: 80%;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            border: 1px solid gray;
+            font-size: 16px;
+        }
+        .modal-content button {
+            padding: 15px 25px;
+            background-color: green;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Scrolling Task Container */
+        .scrollable-task-container {
+            max-height: 400px;
+            overflow-y: scroll;
+            margin-top: 20px;
+        }
+        .nav-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      background-color: #111111;
+      padding: 10px 0;
+    }
+    .nav-bar button {
+      width: 50px;
+      height: 50px;
+      background-color: black;
+      border: none;
+      border-radius: 50%;
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+    }
+    .nav-bar button:focus {
+      outline: 2px solid white;
+    }
+    .nav-bar button.home {
+      background-image: url('home.png');
+    }
+    .nav-bar button.leader {
+      background-image: url('leader.png');
+    }
+   
+    .nav-bar button.airdrop {
+      background-image: url('airdrop.png');
+    }
+    </style>
+</head>
+<body>
+
+    <!-- Wallet Section -->
+    <div class="wallet">
+        <span class="material-icons">account_balance_wallet</span>
+        <span id="coin-balance">0</span>
+    </div>
+
+    <!-- Task Sections -->
+    <div class="task-section">
+        <div class="task-title">Simple task </div>
+        <div id="generalTaskContainer" class="scrollable-task-container"></div>
+
+        <div class="task-title">Social task </div>
+        <div id="codeTaskContainer" class="scrollable-task-container"></div>
+
+        <div class="task-title">Completed Tasks</div>
+        <div id="completedTaskContainer" class="scrollable-task-container"></div>
+    </div>
+    <div class="nav-bar">
+        <button class="home" onclick="window.location.href='home.html'"></button>
+        <button class="leader" onclick="window.location.href='task.html'"></button>
+      
+        <button class="airdrop" onclick="window.location.href='airdrop.html'"></button>
+      </div>
+
+    <!-- Modal Popup for Code -->
+    <div class="modal" id="codeModal">
+        <div class="modal-content">
+            <h2>Enter Task Code</h2>
+            <input type="text" id="taskCodeInput" placeholder="Enter code here">
+            <button id="submitCode">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        const generalTasks = [
+            {
+                id: 23,
+                url: "https://t.me/+P2HHpv1WVKBhMTNl",
+                logo: "https://static.hamsterkombatgame.io/earn/telegram_channel.webp",
+                description: "Telegram task earn 50 AB",
+                reward: 50
+            },
+            {
+                id: 1,
+                url: "https://t.me/+P2HHpv1WVKBhMTNl",
+                logo: "https://static.hamsterkombatgame.io/earn/telegram_channel.webp",
+                description: "Telegram task earn 50 AB",
+                reward: 50
+            }
+        ];
+
+        const codeTasks = [
+            {
+                id: 50,
+                url: "https://t.me/+P2HHpv1WVKBhMTNl",
+                logo: "https://static.hamsterkombatgame.io/earn/telegram_channel.webp",
+                description: "Telegram task earn 50 AB",
+                reward: 50,
+                code: "1111"
+            },
+            {
+                id: 200,
+                url: "https://t.me/+P2HHpv1WVKBhMTNl",
+                logo: "https://static.hamsterkombatgame.io/earn/telegram_channel.webp",
+                description: "Telegram task earn 50 AB",
+                reward: 50,
+                code: "1111"
+            }
+        ];
+
+        const walletEl = document.getElementById("coin-balance");
+        const generalTaskContainer = document.getElementById("generalTaskContainer");
+        const codeTaskContainer = document.getElementById("codeTaskContainer");
+        const completedTaskContainer = document.getElementById("completedTaskContainer");
+        const codeModal = document.getElementById("codeModal");
+        const taskCodeInput = document.getElementById("taskCodeInput");
+        const submitCodeBtn = document.getElementById("submitCode");
+
+        let coinBalance = localStorage.getItem("coinBalance")
+            ? parseInt(localStorage.getItem("coinBalance"))
+            : 0;
+
+        const completedTasks = JSON.parse(localStorage.getItem("completedTasks")) || [];
+
+        function updateWallet() {
+            walletEl.textContent = coinBalance.toLocaleString();
+            localStorage.setItem("coinBalance", coinBalance);
+        }
+
+        function loadTasks() {
+            generalTaskContainer.innerHTML = "";
+            codeTaskContainer.innerHTML = "";
+            completedTaskContainer.innerHTML = "";
+
+            generalTasks.forEach((task) => {
+                if (completedTasks.includes(task.id)) return;
+
+                const taskItem = document.createElement("div");
+                taskItem.className = "task-item";
+                taskItem.innerHTML = `
+                    <img src="${task.logo}" alt="Task Logo">
+                    <div>${task.description}</div>
+                    <button onclick="completeGeneralTask(${task.id}, ${task.reward})">Start</button>
+                `;
+                generalTaskContainer.appendChild(taskItem);
+            });
+
+            codeTasks.forEach((task) => {
+                if (completedTasks.includes(task.id)) return;
+
+                const taskItem = document.createElement("div");
+                taskItem.className = "task-item";
+                taskItem.innerHTML = `
+                    <img src="${task.logo}" alt="Task Logo">
+                    <div>${task.description}</div>
+                    <button onclick="startCodeTask(${task.id}, ${task.reward}, '${task.code}')">Start</button>
+                `;
+                codeTaskContainer.appendChild(taskItem);
+            });
+
+            completedTasks.forEach((taskId) => {
+                const task =
+                    generalTasks.find((t) => t.id === taskId) ||
+                    codeTasks.find((t) => t.id === taskId);
+
+                if (task) {
+                    const taskItem = document.createElement("div");
+                    taskItem.className = "task-item";
+                    taskItem.innerHTML = `
+                        <img src="${task.logo}" alt="Task Logo">
+                        <div>${task.description}</div>
+                        <button class="completed" disabled>Completed</button>
+                    `;
+                    completedTaskContainer.appendChild(taskItem);
+                }
+            });
+        }
+
+        function completeGeneralTask(taskId, reward) {
+            window.open(generalTasks.find((task) => task.id === taskId).url, "_blank");
+            coinBalance += reward;
+            completedTasks.push(taskId);
+            localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
+            updateWallet();
+            loadTasks();
+        }
+
+        function startCodeTask(taskId, reward, code) {
+            const currentTask = codeTasks.find((task) => task.id === taskId);
+            window.open(currentTask.url, "_blank");
+            codeModal.style.display = "flex";
+
+            submitCodeBtn.onclick = function () {
+                if (taskCodeInput.value === code) {
+                    coinBalance += reward;
+                    completedTasks.push(taskId);
+                    localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
+                    updateWallet();
+                    codeModal.style.display = "none";
+                    loadTasks();
+                } else {
+                  
+                }
+            };
+        }
+
+        // Close modal when clicking outside
+        codeModal.addEventListener("click", (e) => {
+            if (e.target === codeModal) codeModal.style.display = "none";
+        });
+
+        updateWallet();
+        loadTasks();
+    </script>
+</body>
+</html>

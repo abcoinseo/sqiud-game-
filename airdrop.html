@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airdrop</title>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f8d7f9; /* Light pink background */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        h1 {
+            color: #d63384; /* Deep pink */
+            margin: 10px 0;
+            font-size: 32px;
+        }
+        .wallet-display {
+            margin: 10px 0;
+            font-size: 18px;
+            background-color: #d63384;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: none; /* Hide initially until wallet is connected */
+        }
+        .countdown {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .countdown-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            width: 80px;
+            height: 80px;
+            background-color: #6f42c1;
+            border: 3px solid #3e1c86;
+            border-radius: 8px; /* All boxes are square */
+        }
+        #ton-connect {
+            margin-top: 20px;
+        }
+        .nav-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      background-color: #111111;
+      padding: 10px 0;
+    }
+    .nav-bar button {
+      width: 50px;
+      height: 50px;
+      background-color: black;
+      border: none;
+      border-radius: 50%;
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+    }
+    .nav-bar button:focus {
+      outline: 2px solid white;
+    }
+    .nav-bar button.home {
+      background-image: url('home.png');
+    }
+    .nav-bar button.leader {
+      background-image: url('leader.png');
+    }
+   
+    .nav-bar button.airdrop {
+      background-image: url('airdrop.png');
+    }
+    </style>
+</head>
+<body>
+    <!-- TON Wallet Connect Button -->
+    <div id="ton-connect"></div>
+
+    <!-- Countdown Timer Heading -->
+    <h1>Airdrop Time</h1>
+
+    <!-- Countdown Timer -->
+    <div class="countdown" id="countdown">
+        <!-- Boxes will be dynamically added here -->
+    </div>
+
+   
+    <div class="wallet-display" id="wallet-display">
+        
+    </div>
+    <div class="nav-bar">
+        <button class="home" onclick="window.location.href='home.html'"></button>
+        <button class="leader" onclick="window.location.href='task.html'"></button>
+      
+        <button class="airdrop" onclick="window.location.href='airdrop.html'"></button>
+      </div>
+
+
+    <script>
+        // Initialize TonConnectUI
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://abu09127abu.github.io/Ab-coin-tast-/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
+        });
+
+        // Check Local Storage for Wallet Address
+        const walletDisplay = document.getElementById("wallet-display");
+        const savedWallet = localStorage.getItem("ton-wallet-address");
+        if (savedWallet) {
+            walletDisplay.textContent = savedWallet;
+            walletDisplay.style.display = 'block'; // Show wallet display if address exists
+        }
+
+        // Wallet Connect Handler
+        async function connectToWallet() {
+            try {
+                const connectedWallet = await tonConnectUI.connectWallet();
+                if (connectedWallet) {
+                    const walletAddress = connectedWallet.address;
+                    localStorage.setItem("ton-wallet-address", walletAddress);
+                    walletDisplay.textContent = walletAddress;
+                    walletDisplay.style.display = 'block'; // Show wallet display when connected
+                }
+            } catch (error) {
+                console.error("Error connecting to wallet:", error);
+            }
+        }
+        connectToWallet();
+
+        // Countdown Timer Logic
+        const countdownContainer = document.getElementById("countdown");
+        const endDate = new Date("June 1, 2025 00:00:00").getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const timeLeft = endDate - now;
+
+            if (timeLeft <= 0) {
+                countdownContainer.innerHTML = "<h2>Airdrop Started!</h2>";
+                clearInterval(countdownInterval);
+                return;
+            }
+
+            const months = Math.floor(timeLeft / (1000 * 60 * 60 * 24 * 30));
+            const days = Math.floor((timeLeft % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            const milliseconds = timeLeft % 1000;
+
+            countdownContainer.innerHTML = `
+                <div class="countdown-box"><span>${months}</span><small>Months</small></div>
+                <div class="countdown-box"><span>${days}</span><small>Days</small></div>
+                <div class="countdown-box"><span>${hours}</span><small>Hours</small></div>
+                <div class="countdown-box"><span>${minutes}</span><small>Minutes</small></div>
+                <div class="countdown-box"><span>${seconds}</span><small>Seconds</small></div>
+                <div class="countdown-box"><span>${milliseconds}</span><small>Milliseconds</small></div>
+            `;
+        }
+
+        const countdownInterval = setInterval(updateCountdown, 50);
+
+        // Redirect to TonConnect App for Mobile
+        tonConnectUI.uiOptions = {
+            twaReturnUrl: 'https://abu09127abu.github.io/Ab-coin-tast-/tonconnect-manifest.json'
+        };
+    </script>
+</body>
+</html>

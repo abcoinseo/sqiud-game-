@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1">
+    <title>Click-to-Earn Squid Game</title>
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            background: rgb(178, 56, 189);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        .wallet {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .wallet .material-icons {
+            margin-right: 10px;
+        }
+        .ads-icon {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            display: none;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 28px;
+            text-align: center;
+        }
+        .status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .circle.green {
+            background-color: green;
+            box-shadow: 0 0 15px green;
+        }
+        .circle.red {
+            background-color: red;
+            box-shadow: 0 0 15px red;
+        }
+        .click-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+        }
+        .click-area img {
+            width: 100%;
+            transition: transform 0.1s ease;
+        }
+        .floating-indicator {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            animation: floatUp 1s ease forwards;
+            pointer-events: none;
+        }
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+        }
+        /* Popup Style */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 1000;
+        }
+        .popup h2 {
+            margin: 0;
+        }
+        .popup button {
+            background-color: green;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        .nav-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      background-color: #111111;
+      padding: 10px 0;
+    }
+    .nav-bar button {
+      width: 50px;
+      height: 50px;
+      background-color: black;
+      border: none;
+      border-radius: 50%;
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+    }
+    .nav-bar button:focus {
+      outline: 2px solid white;
+    }
+    .nav-bar button.home {
+      background-image: url('home.png');
+    }
+    .nav-bar button.leader {
+      background-image: url('leader.png');
+    }
+   
+    .nav-bar button.airdrop {
+      background-image: url('airdrop.png');
+    }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Wallet -->
+        <div class="wallet">
+            <span class="material-icons">account_balance_wallet</span>
+            <span id="coin-balance">0</span>
+        </div>
+        <!-- Ads Icon -->
+        <div class="ads-icon" id="ads-icon">
+            <span class="material-icons">monetization_on</span>
+        </div>
+        <!-- Status -->
+        <div class="status">
+            <div class="circle green" id="light-indicator"></div>
+        </div>
+        <!-- Click Area -->
+        <div class="click-area" id="click-area">
+            <img src="1.png" alt="Click to Earn" id="clickable">
+        </div>
+    </div>
+    <div class="nav-bar">
+        <button class="home" onclick="window.location.href='home.html'"></button>
+        <button class="leader" onclick="window.location.href='task.html'"></button>
+      
+        <button class="airdrop" onclick="window.location.href='airdrop.html'"></button>
+      </div>
+
+    <!-- Sounds -->
+    <audio id="green-sound" src="1.mp3"></audio>
+    <audio id="red-sound" src="3.mp3"></audio>
+    <!-- Background Sound -->
+    <audio id="bg-sound" src="2.mp3" loop></audio>
+
+    <!-- Popup for Reward -->
+    <div class="popup" id="reward-popup">
+        <h2>Congratulations!</h2>
+        <p>You earned <span id="reward-amount">0</span> coins.</p>
+        <button onclick="closePopup()">Close</button>
+    </div>
+
+    <script src='//niphaumeenses.net/vignette.min.js' data-zone='8773093' data-sdk='show_8773093'></script>
+
+    <script>
+        const coinBalanceEl = document.getElementById('coin-balance');
+        const lightIndicatorEl = document.getElementById('light-indicator');
+        const clickableEl = document.getElementById('clickable');
+        const greenSound = document.getElementById('green-sound');
+        const redSound = document.getElementById('red-sound');
+        const bgSound = document.getElementById('bg-sound');
+        const clickArea = document.getElementById('click-area');
+        const adsIcon = document.getElementById('ads-icon');
+        const rewardPopup = document.getElementById('reward-popup');
+        const rewardAmountEl = document.getElementById('reward-amount');
+
+        let isGreenLight = true;
+        let coinBalance = localStorage.getItem('coinBalance') ? parseInt(localStorage.getItem('coinBalance')) : 0;
+
+        // Set background sound volume to 30%
+        bgSound.volume = 0.3;
+
+        // Update coin balance UI with formatted coins (with commas)
+        function updateCoinBalance() {
+            coinBalanceEl.textContent = formatNumber(coinBalance);
+            localStorage.setItem('coinBalance', coinBalance);
+        }
+
+        // Format numbers with commas
+        function formatNumber(num) {
+            return num.toLocaleString();
+        }
+
+        // Switch between red light and green light
+        function switchLight() {
+            isGreenLight = !isGreenLight;
+            if (isGreenLight) {
+                lightIndicatorEl.classList.remove('red');
+                lightIndicatorEl.classList.add('green');
+                greenSound.play();
+            } else {
+                lightIndicatorEl.classList.remove('green');
+                lightIndicatorEl.classList.add('red');
+                redSound.play();
+            }
+        }
+        setInterval(switchLight, Math.random() * 2000 + 3000); // Switch every 3-5 seconds
+
+        // Multi-touch support
+        clickArea.addEventListener('touchstart', (e) => {
+            for (const touch of e.touches) {
+                handleTouch(touch.clientX, touch.clientY);
+            }
+        });
+
+        // Handle touch input
+        function handleTouch(x, y) {
+            if (!isGreenLight) {
+                coinBalance -= 4;
+                createFloatingIndicator(x, y, '-4', 'red');
+            } else {
+                const coinsEarned = Math.floor(Math.random() * 5) + 1;
+                coinBalance += coinsEarned;
+                createFloatingIndicator(x, y, `+${coinsEarned}`, 'green');
+            }
+            updateCoinBalance();
+
+            // Animation for the image
+            clickableEl.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                clickableEl.style.transform = 'scale(1)';
+            }, 100);
+        }
+
+        // Create floating indicator at touch location
+        function createFloatingIndicator(x, y, text, color) {
+            const indicator = document.createElement('div');
+            indicator.textContent = text;
+            indicator.className = 'floating-indicator';
+            indicator.style.color = color;
+            indicator.style.left = `${x}px`;
+            indicator.style.top = `${y}px`;
+            document.body.appendChild(indicator);
+
+            // Remove the indicator after animation
+            indicator.addEventListener('animationend', () => {
+                indicator.remove();
+            });
+        }
+
+        // Show the "Ads Icon" button after every 10 seconds
+        setInterval(() => {
+            adsIcon.style.display = 'block';
+        }, 10000); // Every 10 seconds
+
+        // Ads Icon click event
+        adsIcon.addEventListener('click', () => {
+            show_8773093().then(() => {
+                // Reward the user with a random amount of coins (between 100 and 400)
+                const coinsEarned = Math.floor(Math.random() * 301) + 100; // Range: 100 to 400
+                coinBalance += coinsEarned;
+                updateCoinBalance();
+                rewardAmountEl.textContent = coinsEarned;
+                showPopup();
+                adsIcon.style.display = 'none'; // Hide the ad icon after click
+            }).catch(() => {
+                alert('Failed to load the ad. Please try again.');
+            });
+        });
+
+        // Show the reward popup
+        function showPopup() {
+            rewardPopup.style.display = 'block';
+        }
+
+        // Close the reward popup
+        function closePopup() {
+            rewardPopup.style.display = 'none';
+        }
+
+        // Initialize
+        updateCoinBalance();
+
+        // Start the background sound after a 2-second delay
+        setTimeout(() => {
+            bgSound.play();
+        }, 2000);  // 2 seconds delay
+    </script>
+</body>
+</html>

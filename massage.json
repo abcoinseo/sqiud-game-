@@ -1,0 +1,24 @@
+{
+    "users": {
+      "user1": {
+        "phone": "1234567890",
+        "pin": "1234",
+        "balance": 1000,
+        "transactions": [
+          {
+            "type": "send",
+            "amount": 100,
+            "receiver": "0987654321",
+            "timestamp": "2025-01-09T10:00:00Z"
+          },
+          {
+            "type": "receive",
+            "amount": 200,
+            "sender": "9876543210",
+            "timestamp": "2025-01-08T08:30:00Z"
+          }
+        ]
+      }
+    }
+  }
+  
